@@ -2,14 +2,11 @@ package networking
 
 import model.KnownRepo
 import model.RepositoryLink
-import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SchemaUtils.create
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
 
-class SQLConnection(val url: String,
-                    val password: String) {
+class SQLConnection(val url: String) {
 
     object KnownRepos : Table() {
         val url = varchar("url", 100).primaryKey()
@@ -22,16 +19,23 @@ class SQLConnection(val url: String,
     }
 
     init {
-        Database.connect(url, driver = "org.h2.Driver")
+        Class.forName("org.postgresql.Driver");
+        Database.connect(url, driver = "org.postgresql.Driver")
     }
 
     fun getAllKnownRepos(): List<KnownRepo> {
-        create(KnownRepos, RepositoryLinks)
-        return KnownRepos.selectAll().map { it -> KnownRepo(it[KnownRepos.url], it[KnownRepos.lastCommitHash]) }.toList();
+        return transaction {
+            logger.addLogger(StdOutSqlLogger)
+            create(KnownRepos, RepositoryLinks)
+            return@transaction KnownRepos.selectAll().map { it -> KnownRepo(it[KnownRepos.url], it[KnownRepos.lastCommitHash]) }.toList();
+        }
     }
 
     fun getAllTriggerURLs(githubURL: String): List<RepositoryLink> {
-        create(KnownRepos, RepositoryLinks)
-        return RepositoryLinks.select { RepositoryLinks.githubURL eq githubURL }.map { it -> RepositoryLink(it[RepositoryLinks.githubURL], it[RepositoryLinks.triggerURL]) }.toList();
+        return transaction {
+            logger.addLogger(StdOutSqlLogger)
+            create(KnownRepos, RepositoryLinks)
+            return@transaction RepositoryLinks.select { RepositoryLinks.githubURL eq githubURL }.map { it -> RepositoryLink(it[RepositoryLinks.githubURL], it[RepositoryLinks.triggerURL]) }.toList();
+        }
     }
 }

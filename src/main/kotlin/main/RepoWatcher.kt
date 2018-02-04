@@ -11,10 +11,9 @@ import kotlin.concurrent.timer
  * This is the main Application class
  */
 class RepoWatcher {
-
     val checker = GitHubChecker()
 
-    val sqlConnection = SQLConnection("","")
+    val sqlConnection = SQLConnection(System.getenv("DATABASE_URL"))
 
     init {
         println("GitHubCommit Watcher starting..")
@@ -27,7 +26,6 @@ class RepoWatcher {
             println("Starting new monitoring circle")
             scanForChangedRepos()
         })
-
     }
 
     //TODO Save triggered state in the database
