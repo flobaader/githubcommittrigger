@@ -11,8 +11,8 @@ buildscript {
 
 group 'com.github.flobaader'
 version '1.0-SNAPSHOT'
-
 apply plugin: 'kotlin'
+apply plugin: 'application'
 
 repositories {
     mavenCentral()
@@ -35,6 +35,8 @@ dependencies {
     // https://mvnrepository.com/artifact/postgresql/postgresql
     compile group: 'postgresql', name: 'postgresql', version: '9.1-901-1.jdbc4'
 }
+
+mainClassName = "main.RepoWatcher"
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"

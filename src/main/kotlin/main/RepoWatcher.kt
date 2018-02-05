@@ -11,9 +11,19 @@ import kotlin.concurrent.timer
  * This is the main Application class
  */
 class RepoWatcher {
+
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            var watcher = RepoWatcher()
+            watcher.startMonitoring()
+        }
+    }
+
     val checker = GitHubChecker()
 
-    val sqlConnection = SQLConnection(System.getenv("DATABASE_URL"))
+    //Attention: This URL ist not visible in the heroku config but dynamically created at the gradle startup
+    val sqlConnection = SQLConnection(System.getenv("JDBC_DATABASE_URL"))
 
     init {
         println("GitHubCommit Watcher starting..")
